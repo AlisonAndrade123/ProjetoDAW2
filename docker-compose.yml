@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: minimundo_user
+      POSTGRES_PASSWORD: minimundo_pwd
+      POSTGRES_DB: mini_mundo_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - minimundo-data:/var/lib/postgresql/data
+
+volumes:
+  minimundo-data:
