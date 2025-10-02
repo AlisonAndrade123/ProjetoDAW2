@@ -22,8 +22,7 @@
             <property name="jakarta.persistence.jdbc.password" value="minimundo_pwd" />
 
             <!-- HIBERNATE -->
-            <!-- Usar "create" é melhor, Ele recria o banco do zero a cada execução, evitando erros de chaves duplicadas nos testes. -->
-            <property name="hibernate.hbm2ddl.auto" value="create" />
+            <property name="hibernate.hbm2ddl.auto" value="update" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.use_sql_comments" value="true" />
