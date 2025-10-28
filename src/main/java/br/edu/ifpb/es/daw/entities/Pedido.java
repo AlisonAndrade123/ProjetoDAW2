@@ -15,7 +15,9 @@ public class Pedido {
     @Column(nullable = false)
     private LocalDateTime dataDoPedido;
 
-    private String status; // Ex: AGUARDANDO_PAGAMENTO, ENVIADO, ENTREGUE
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StatusPedido status;
 
     @Column(nullable = false)
     private Double valorTotal;
@@ -28,8 +30,8 @@ public class Pedido {
     public void setId(Long id) { this.id = id; }
     public LocalDateTime getDataDoPedido() { return dataDoPedido; }
     public void setDataDoPedido(LocalDateTime dataDoPedido) { this.dataDoPedido = dataDoPedido; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public StatusPedido getStatus() { return status; }
+    public void setStatus(StatusPedido status) { this.status = status; }
     public Double getValorTotal() { return valorTotal; }
     public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
 
@@ -51,7 +53,7 @@ public class Pedido {
         return "Pedido{" +
                 "id=" + id +
                 ", dataDoPedido=" + dataDoPedido +
-                ", status='" + status + '\'' +
+                ", status=" + status +
                 ", valorTotal=" + valorTotal +
                 '}';
     }

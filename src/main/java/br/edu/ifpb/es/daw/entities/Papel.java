@@ -11,15 +11,16 @@ public class Papel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
-    private String nome; // Ex: PAPEL_CLIENTE, PAPEL_ADMIN
+    private NomePapel nome;
 
     public Papel() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public NomePapel getNome() { return nome; }
+    public void setNome(NomePapel nome) { this.nome = nome; }
 
     @Override
     public boolean equals(Object o) {
@@ -38,7 +39,7 @@ public class Papel {
     public String toString() {
         return "Papel{" +
                 "id=" + id +
-                ", nome='" + nome + '\'' +
+                ", nome=" + nome +
                 '}';
     }
 }
