@@ -1,7 +1,10 @@
 package br.edu.ifpb.es.daw.entities;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+
 
 @Entity
 @Table(name = "produtos")
@@ -24,6 +27,14 @@ public class Produto {
 
     private String imagemUrl;
 
+    // --- ADICIONAR ESTE BLOCO ---
+    @ManyToOne
+    @JoinColumn(name = "categoria_id", nullable = false)
+    private Categoria categoria;
+
+    @OneToMany(mappedBy = "produto")
+    private List<ItemPedido> itensPedido = new ArrayList<>();
+
     public Produto() {}
 
     public Long getId() { return id; }
@@ -38,6 +49,23 @@ public class Produto {
     public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
     public String getImagemUrl() { return imagemUrl; }
     public void setImagemUrl(String imagemUrl) { this.imagemUrl = imagemUrl; }
+
+    // --- ADICIONAR ESTES MÉTODOS ---
+    public Categoria getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(Categoria categoria) {
+        this.categoria = categoria;
+    }
+
+    public List<ItemPedido> getItensPedido() {
+        return itensPedido;
+    }
+
+    public void setItensPedido(List<ItemPedido> itensPedido) {
+        this.itensPedido = itensPedido;
+    }
 
     @Override
     public boolean equals(Object o) {

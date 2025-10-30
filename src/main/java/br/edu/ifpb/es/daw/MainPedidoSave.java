@@ -1,31 +1,51 @@
-// src/main/java/br/edu/ifpb/es/daw/MainPedidoSave.java
 package br.edu.ifpb.es.daw;
 
 import br.edu.ifpb.es.daw.dao.PedidoDAO;
 import br.edu.ifpb.es.daw.dao.impl.PedidoDAOImpl;
-import br.edu.ifpb.es.daw.dao.PersistenciaDawException; // Importação correta da exceção
-import br.edu.ifpb.es.daw.entities.Pedido;
-import br.edu.ifpb.es.daw.entities.StatusPedido;
+import br.edu.ifpb.es.daw.entities.*;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
-
 import java.time.LocalDateTime;
 
 public class MainPedidoSave {
-
-    // AQUI: Adicione 'throws PersistenciaDawException'
-    public static void main(String[] args) throws PersistenciaDawException {
+    public static void main(String[] args) throws DawException {
         try(EntityManagerFactory emf = Persistence.createEntityManagerFactory("daw")) {
-            PedidoDAO dao = new PedidoDAOImpl(emf);
+            PedidoDAO pedidoDAO = new PedidoDAOImpl(emf);
 
-            System.out.println("Salvando novo pedido...");
+            long idUsuarioExistente = 2L;
+            long idProdutoExistente = 1L;
+
+            Usuario usuarioAssociado = new Usuario();
+            usuarioAssociado.setId(idUsuarioExistente);
+
+            Produto produtoAssociado = new Produto();
+            produtoAssociado.setId(idProdutoExistente);
+
+            double precoDoProduto = 29.99;
+
             Pedido pedido = new Pedido();
             pedido.setDataDoPedido(LocalDateTime.now());
-            pedido.setStatus(StatusPedido.ENVIADO); // Ou ENTREGUE, CANCELADO
-            pedido.setValorTotal(199.99);
+            pedido.setStatus(StatusPedido.ENVIADO);
+            pedido.setUsuario(usuarioAssociado); // Associando o usuário "fantasma"
 
-            dao.save(pedido);
-            System.out.println("Pedido salvo com sucesso! ID: " + pedido.getId());
+            ItemPedido item = new ItemPedido();
+            item.setQuantidade(5);
+            item.setPrecoUnitario(precoDoProduto);
+            item.setProduto(produtoAssociado); // Associando o produto "fantasma"
+            item.setPedido(pedido); // Ligação de volta para o pedido pai (essencial para o relacionamento)
+
+            pedido.getItens().add(item);
+
+            pedido.setValorTotal(item.getQuantidade() * item.getPrecoUnitario());
+
+
+            pedidoDAO.save(pedido);
+
+            System.out.println("Pedido e seu item salvos com sucesso via cascade!");
+            System.out.println("Pedido salvo: " + pedido);
+            if (!pedido.getItens().isEmpty()) {
+                System.out.println("Item salvo com ID: " + pedido.getItens().get(0).getId());
+            }
         }
     }
 }

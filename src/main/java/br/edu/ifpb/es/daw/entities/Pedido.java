@@ -1,5 +1,7 @@
 package br.edu.ifpb.es.daw.entities;
 
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -22,6 +24,13 @@ public class Pedido {
     @Column(nullable = false)
     private Double valorTotal;
 
+    // >>>>> Campo usuario  <<<<<
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario  usuario;
+
+    @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ItemPedido> itens = new ArrayList<>();
 
     public Pedido() {}
 
@@ -34,6 +43,24 @@ public class Pedido {
     public void setStatus(StatusPedido status) { this.status = status; }
     public Double getValorTotal() { return valorTotal; }
     public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
+
+
+    // >>>>> Get Usuario <<<<<
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public List<ItemPedido> getItens() {
+        return itens;
+    }
+
+    public void setItens(List<ItemPedido> itens) {
+        this.itens = itens;
+    }
 
     @Override
     public boolean equals(Object o) {

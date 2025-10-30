@@ -27,6 +27,11 @@ public class Endereco {
     @Column(nullable = false)
     private String cep;
 
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
     public Endereco() {}
 
     public Long getId() { return id; }
@@ -45,6 +50,16 @@ public class Endereco {
     public void setEstado(String estado) { this.estado = estado; }
     public String getCep() { return cep; }
     public void setCep(String cep) { this.cep = cep; }
+
+
+    // --- NOVO --- Adicionei estes métodos
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
 
     @Override
     public boolean equals(Object o) {

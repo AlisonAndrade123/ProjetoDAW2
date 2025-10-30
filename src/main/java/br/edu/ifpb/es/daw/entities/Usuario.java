@@ -1,5 +1,12 @@
 package br.edu.ifpb.es.daw.entities;
 
+
+import java.util.ArrayList;
+import java.util.List;
+// --- NOVO --- Adicione estes imports
+import java.util.HashSet;
+import java.util.Set;
+// ------------
 import jakarta.persistence.*;
 import java.util.Objects;
 
@@ -20,6 +27,21 @@ public class Usuario {
     @Column(nullable = false)
     private String senha;
 
+    // --- campo dos Relacionamentos ---
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Pedido> pedidos = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.REFRESH })
+    @JoinTable(
+            name = "usuarios_papeis",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "papel_id")
+    )
+    private Set<Papel> papeis = new HashSet<>();
+
     public Usuario() {}
 
     public Long getId() { return id; }
@@ -30,6 +52,30 @@ public class Usuario {
     public void setEmail(String email) { this.email = email; }
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public List<Endereco> getEnderecos() {
+        return enderecos;
+    }
+
+    public void setEnderecos(List<Endereco> enderecos) {
+        this.enderecos = enderecos;
+    }
+
+    public List<Pedido> getPedidos() {
+        return pedidos;
+    }
+
+    public void setPedidos(List<Pedido> pedidos) {
+        this.pedidos = pedidos;
+    }
+
+    public Set<Papel> getPapeis() {
+        return papeis;
+    }
+
+    public void setPapeis(Set<Papel> papeis) {
+        this.papeis = papeis;
+    }
 
     @Override
     public boolean equals(Object o) {
