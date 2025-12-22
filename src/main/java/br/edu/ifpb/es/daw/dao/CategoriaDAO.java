@@ -4,4 +4,5 @@ import br.edu.ifpb.es.daw.entities.Categoria;
 
 public interface CategoriaDAO extends DAO<Categoria, Long> {
 
+    Categoria buscarPorIdComProdutos(Long id);
 }
