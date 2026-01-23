@@ -1,51 +1,48 @@
 package br.edu.ifpb.es.daw;
 
-import br.edu.ifpb.es.daw.dao.PedidoDAO;
-import br.edu.ifpb.es.daw.dao.impl.PedidoDAOImpl;
+import br.edu.ifpb.es.daw.dao.*;
+import br.edu.ifpb.es.daw.dao.impl.*;
 import br.edu.ifpb.es.daw.entities.*;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class MainPedidoSave {
     public static void main(String[] args) throws DawException {
         try(EntityManagerFactory emf = Persistence.createEntityManagerFactory("daw")) {
             PedidoDAO pedidoDAO = new PedidoDAOImpl(emf);
+            UsuarioDAO usuarioDAO = new UsuarioDAOImpl(emf);
+            ProdutoDAO produtoDAO = new ProdutoDAOImpl(emf);
 
-            long idUsuarioExistente = 2L;
-            long idProdutoExistente = 1L;
+            List<Usuario> usuarios = usuarioDAO.getAll();
+            List<Produto> produtos = produtoDAO.getAll();
 
-            Usuario usuarioAssociado = new Usuario();
-            usuarioAssociado.setId(idUsuarioExistente);
+            if (usuarios.isEmpty() || produtos.isEmpty()) {
+                System.err.println("ERRO: É preciso ter pelo menos um usuário e um produto cadastrados.");
+                return;
+            }
+            Usuario usuarioAssociado = usuarios.get(0);
+            Produto produtoAssociado = produtos.get(0);
 
-            Produto produtoAssociado = new Produto();
-            produtoAssociado.setId(idProdutoExistente);
 
-            double precoDoProduto = 29.99;
-
+            System.out.println("Criando pedido para " + usuarioAssociado.getNome() + " com o produto " + produtoAssociado.getNome());
             Pedido pedido = new Pedido();
             pedido.setDataDoPedido(LocalDateTime.now());
             pedido.setStatus(StatusPedido.ENVIADO);
-            pedido.setUsuario(usuarioAssociado); // Associando o usuário "fantasma"
+            pedido.setUsuario(usuarioAssociado);
 
             ItemPedido item = new ItemPedido();
-            item.setQuantidade(5);
-            item.setPrecoUnitario(precoDoProduto);
-            item.setProduto(produtoAssociado); // Associando o produto "fantasma"
-            item.setPedido(pedido); // Ligação de volta para o pedido pai (essencial para o relacionamento)
+            item.setQuantidade(1);
+            item.setPrecoUnitario(produtoAssociado.getPreco());
+            item.setProduto(produtoAssociado);
+            item.setPedido(pedido);
 
             pedido.getItens().add(item);
-
             pedido.setValorTotal(item.getQuantidade() * item.getPrecoUnitario());
 
-
             pedidoDAO.save(pedido);
-
-            System.out.println("Pedido e seu item salvos com sucesso via cascade!");
-            System.out.println("Pedido salvo: " + pedido);
-            if (!pedido.getItens().isEmpty()) {
-                System.out.println("Item salvo com ID: " + pedido.getItens().get(0).getId());
-            }
+            System.out.println("Pedido salvo com sucesso!");
         }
     }
 }
