@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "categorias")
@@ -16,6 +17,7 @@ public class Categoria {
     private String nome;
 
     // --- CÓDIGO DO RELACIONAMENTO ADICIONADO ---
+    @JsonIgnore
     @OneToMany(mappedBy = "categoria", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Produto> produtos = new ArrayList<>();
 

@@ -5,6 +5,8 @@ import java.util.List;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "pedidos")
@@ -14,7 +16,7 @@ public class Pedido {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "data_do_pedido", nullable = false)
     private LocalDateTime dataDoPedido;
 
     @Enumerated(EnumType.STRING)
@@ -29,6 +31,7 @@ public class Pedido {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario  usuario;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ItemPedido> itens = new ArrayList<>();
 

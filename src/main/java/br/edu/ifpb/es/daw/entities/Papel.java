@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "papeis")
@@ -16,7 +18,7 @@ public class Papel {
     @Column(unique = true, nullable = false)
     private String nome; // <-- Mudei para String e removi @Enumerated
 
-
+    @JsonIgnore
     @ManyToMany(mappedBy = "papeis")
     private Set<Usuario> usuarios = new HashSet<>();
 
