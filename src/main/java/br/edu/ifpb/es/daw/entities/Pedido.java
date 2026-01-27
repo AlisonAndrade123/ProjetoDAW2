@@ -1,12 +1,11 @@
 package br.edu.ifpb.es.daw.entities;
 
+import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.Objects;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 
 @Entity
 @Table(name = "pedidos")
@@ -23,47 +22,49 @@ public class Pedido {
     @Column(nullable = false)
     private StatusPedido status;
 
-    @Column(nullable = false)
-    private Double valorTotal;
+    // ✅ garante nome certo no banco e evita null
+    @Column(name = "valor_total", nullable = false)
+    private Double valorTotal = 0.0;
 
-    // >>>>> Campo usuario  <<<<<
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario  usuario;
+    private Usuario usuario;
 
-    @JsonIgnore
+    // ✅ agora itens aparecem no JSON (sem @JsonIgnore aqui)
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ItemPedido> itens = new ArrayList<>();
 
     public Pedido() {}
 
+    @PrePersist
+    public void prePersist() {
+        if (dataDoPedido == null) dataDoPedido = LocalDateTime.now();
+        if (status == null) status = StatusPedido.ENVIADO;
+        if (valorTotal == null) valorTotal = 0.0;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        if (valorTotal == null) valorTotal = 0.0;
+    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public LocalDateTime getDataDoPedido() { return dataDoPedido; }
     public void setDataDoPedido(LocalDateTime dataDoPedido) { this.dataDoPedido = dataDoPedido; }
+
     public StatusPedido getStatus() { return status; }
     public void setStatus(StatusPedido status) { this.status = status; }
+
     public Double getValorTotal() { return valorTotal; }
     public void setValorTotal(Double valorTotal) { this.valorTotal = valorTotal; }
 
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
 
-    // >>>>> Get Usuario <<<<<
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public List<ItemPedido> getItens() {
-        return itens;
-    }
-
-    public void setItens(List<ItemPedido> itens) {
-        this.itens = itens;
-    }
+    public List<ItemPedido> getItens() { return itens; }
+    public void setItens(List<ItemPedido> itens) { this.itens = itens; }
 
     @Override
     public boolean equals(Object o) {
