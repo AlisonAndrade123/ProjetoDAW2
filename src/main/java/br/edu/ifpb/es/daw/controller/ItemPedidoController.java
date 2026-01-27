@@ -22,12 +22,54 @@ public class ItemPedidoController {
     @Autowired
     private EntityManagerFactory emf;
 
+    // ================== GET NORMAL ==================
     @GetMapping
     public List<ItemPedido> listarTodos() throws PersistenciaDawException {
         ItemPedidoDAO dao = new ItemPedidoDAOImpl(emf);
         return dao.getAll();
     }
 
+    // ================== GET PAGINAÇÃO ==================
+    @GetMapping("/page")
+    public ResponseEntity<List<ItemPedido>> listarComPaginacao(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) throws PersistenciaDawException {
+
+        ItemPedidoDAO dao = new ItemPedidoDAOImpl(emf);
+        List<ItemPedido> todos = dao.getAll();
+
+        int start = page * size;
+        int end = Math.min(start + size, todos.size());
+
+        if (start >= todos.size()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        return ResponseEntity.ok(todos.subList(start, end));
+    }
+
+    // ================== GET FILTRO ==================
+    @GetMapping("/filtro")
+    public ResponseEntity<List<ItemPedido>> filtrar(
+            @RequestParam(required = false) Long pedidoId,
+            @RequestParam(required = false) Long produtoId
+    ) throws PersistenciaDawException {
+
+        ItemPedidoDAO dao = new ItemPedidoDAOImpl(emf);
+        List<ItemPedido> todos = dao.getAll();
+
+        List<ItemPedido> filtrados = todos.stream()
+                .filter(i ->
+                        (pedidoId == null || i.getPedido().getId().equals(pedidoId)) &&
+                                (produtoId == null || i.getProduto().getId().equals(produtoId))
+                )
+                .toList();
+
+        return ResponseEntity.ok(filtrados);
+    }
+
+    // ================== GET POR ID ==================
     @GetMapping("/{id}")
     public ResponseEntity<ItemPedido> buscarPorId(@PathVariable Long id) throws PersistenciaDawException {
         ItemPedidoDAO dao = new ItemPedidoDAOImpl(emf);
@@ -35,6 +77,7 @@ public class ItemPedidoController {
         return item != null ? ResponseEntity.ok(item) : ResponseEntity.notFound().build();
     }
 
+    // ================== POST ==================
     @PostMapping
     public ResponseEntity<?> salvar(@RequestBody ItemPedidoDTO dto) {
         try {
@@ -73,6 +116,7 @@ public class ItemPedidoController {
         }
     }
 
+    // ================== DELETE ==================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws PersistenciaDawException {
         ItemPedidoDAO dao = new ItemPedidoDAOImpl(emf);

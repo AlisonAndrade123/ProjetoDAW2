@@ -20,14 +20,53 @@ public class ProdutoController {
     @Autowired
     private EntityManagerFactory emf;
 
-    // GET ALL
+    // ================== GET NORMAL ==================
     @GetMapping
     public List<Produto> listar() throws PersistenciaDawException {
-        ProdutoDAO dao = new ProdutoDAOImpl(emf);
-        return dao.getAll();
+        return new ProdutoDAOImpl(emf).getAll();
     }
 
-    // GET BY ID
+    // ================== GET PAGINAÇÃO ==================
+    @GetMapping("/page")
+    public ResponseEntity<List<Produto>> listarComPaginacao(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) throws PersistenciaDawException {
+
+        ProdutoDAO dao = new ProdutoDAOImpl(emf);
+        List<Produto> todos = dao.getAll();
+
+        int start = page * size;
+        int end = Math.min(start + size, todos.size());
+
+        if (start >= todos.size()) {
+            return ResponseEntity.ok(List.of());
+        }
+
+        return ResponseEntity.ok(todos.subList(start, end));
+    }
+
+    // ================== GET FILTRO ==================
+    @GetMapping("/filtro")
+    public ResponseEntity<List<Produto>> filtrar(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false) Long categoriaId
+    ) throws PersistenciaDawException {
+
+        ProdutoDAO dao = new ProdutoDAOImpl(emf);
+        List<Produto> todos = dao.getAll();
+
+        List<Produto> filtrados = todos.stream()
+                .filter(p ->
+                        (nome == null || p.getNome().toLowerCase().contains(nome.toLowerCase())) &&
+                                (categoriaId == null || p.getCategoria().getId().equals(categoriaId))
+                )
+                .toList();
+
+        return ResponseEntity.ok(filtrados);
+    }
+
+    // ================== GET POR ID ==================
     @GetMapping("/{id}")
     public ResponseEntity<Produto> buscarPorId(@PathVariable Long id)
             throws PersistenciaDawException {
@@ -40,7 +79,7 @@ public class ProdutoController {
                 : ResponseEntity.notFound().build();
     }
 
-    // POST
+    // ================== POST ==================
     @PostMapping
     public ResponseEntity<Produto> salvar(@RequestBody Produto produto)
             throws PersistenciaDawException {
@@ -55,7 +94,7 @@ public class ProdutoController {
         }
     }
 
-    // PUT
+    // ================== PUT ==================
     @PutMapping("/{id}")
     public ResponseEntity<Produto> atualizar(
             @PathVariable Long id,
@@ -74,7 +113,7 @@ public class ProdutoController {
         return ResponseEntity.ok(produto);
     }
 
-    // DELETE
+    // ================== DELETE ==================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id)
             throws PersistenciaDawException {
