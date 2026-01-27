@@ -16,7 +16,7 @@ public class MainItemPedidoSave {
             PedidoDAO pedidoDAO = new PedidoDAOImpl(emf);
             ItemPedidoDAO itemPedidoDAO = new ItemPedidoDAOImpl(emf);
 
-            long idPedidoExistente = 2L;
+            long idPedidoExistente = 1L;
             long idProdutoExistente = 1L;
 
             Pedido pedido = pedidoDAO.getByID(idPedidoExistente);
