@@ -1,4 +1,3 @@
-// PedidoController.java
 package br.edu.ifpb.es.daw.controller;
 
 import br.edu.ifpb.es.daw.dao.PedidoDAO;
@@ -26,109 +25,80 @@ public class PedidoController {
 
     @GetMapping
     public List<Pedido> listarTodos() throws PersistenciaDawException {
-        PedidoDAO dao = new PedidoDAOImpl(emf);
-        return dao.getAll();
+        return new PedidoDAOImpl(emf).getAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Pedido> buscarPorId(@PathVariable Long id) throws PersistenciaDawException {
-        PedidoDAO dao = new PedidoDAOImpl(emf);
-        Pedido pedido = dao.getByID(id);
+        Pedido pedido = new PedidoDAOImpl(emf).getByID(id);
         return (pedido != null) ? ResponseEntity.ok(pedido) : ResponseEntity.notFound().build();
     }
 
+    // CRIA PEDIDO (única vez)
     @PostMapping
     public ResponseEntity<Pedido> salvar(@RequestBody Pedido pedido) throws PersistenciaDawException {
         PedidoDAO pedidoDAO = new PedidoDAOImpl(emf);
 
         try {
-            if (pedido.getDataDoPedido() == null) pedido.setDataDoPedido(LocalDateTime.now());
-            if (pedido.getStatus() == null) pedido.setStatus(StatusPedido.ENVIADO);
+            if (pedido.getDataDoPedido() == null)
+                pedido.setDataDoPedido(LocalDateTime.now());
 
-            // usuario obrigatório
-            if (pedido.getUsuario() == null || pedido.getUsuario().getId() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+            if (pedido.getStatus() == null)
+                pedido.setStatus(StatusPedido.ENVIADO);
+
+            if (pedido.getUsuario() == null || pedido.getUsuario().getId() == null)
+                return ResponseEntity.badRequest().build();
 
             double total = 0.0;
 
-            if (pedido.getItens() != null && !pedido.getItens().isEmpty()) {
+            if (pedido.getItens() != null) {
                 for (ItemPedido item : pedido.getItens()) {
-                    // liga bidirecional (cascade funcionar)
                     item.setPedido(pedido);
-
-                    Integer qtd = item.getQuantidade();
-                    Double preco = item.getPrecoUnitario();
-
-                    if (qtd == null) qtd = 0;
-                    if (preco == null) preco = 0.0;
-
+                    Integer qtd = item.getQuantidade() != null ? item.getQuantidade() : 0;
+                    Double preco = item.getPrecoUnitario() != null ? item.getPrecoUnitario() : 0.0;
                     total += qtd * preco;
                 }
             }
 
             pedido.setValorTotal(total);
-
             pedidoDAO.save(pedido);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
 
-        } catch (PersistenceException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Pedido> atualizar(@PathVariable Long id, @RequestBody Pedido pedido) throws PersistenciaDawException {
-        PedidoDAO pedidoDAO = new PedidoDAOImpl(emf);
-        Pedido existente = pedidoDAO.getByID(id);
+    // MUDA APENAS O STATUS
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Pedido> atualizarStatus(
+            @PathVariable Long id,
+            @RequestBody StatusPedido status)
+            throws PersistenciaDawException {
 
-        if (existente == null) return ResponseEntity.notFound().build();
+        PedidoDAO dao = new PedidoDAOImpl(emf);
+        Pedido pedido = dao.getByID(id);
 
-        pedido.setId(id);
+        if (pedido == null)
+            return ResponseEntity.notFound().build();
 
-        // usuario obrigatório
-        if (pedido.getUsuario() == null || pedido.getUsuario().getId() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        pedido.setStatus(status);
+        dao.update(pedido);
 
-        double total = 0.0;
-
-        if (pedido.getItens() != null && !pedido.getItens().isEmpty()) {
-            for (ItemPedido item : pedido.getItens()) {
-                item.setPedido(pedido);
-
-                Integer qtd = item.getQuantidade();
-                Double preco = item.getPrecoUnitario();
-
-                if (qtd == null) qtd = 0;
-                if (preco == null) preco = 0.0;
-
-                total += qtd * preco;
-            }
-        }
-
-        pedido.setValorTotal(total);
-
-        pedidoDAO.update(pedido);
         return ResponseEntity.ok(pedido);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) throws PersistenciaDawException {
         PedidoDAO dao = new PedidoDAOImpl(emf);
-        Pedido pedidoExistente = dao.getByID(id);
+        Pedido pedido = dao.getByID(id);
 
-        if (pedidoExistente == null) return ResponseEntity.notFound().build();
+        if (pedido == null)
+            return ResponseEntity.notFound().build();
 
-        try {
-            dao.delete(id);
-            return ResponseEntity.noContent().build();
-        } catch (PersistenceException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+        dao.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
